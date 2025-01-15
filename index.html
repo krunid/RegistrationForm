@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบลงทะเบียนเพื่อรับไฟล์</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 bg-white shadow-lg rounded-lg p-4 hidden">
+        <div id="toastContent" class="flex items-center">
+            <i id="toastIcon" class="mr-2"></i>
+            <p id="toastMessage"></p>
+        </div>
+    </div>
+
+    <!-- Email Preview Modal -->
+    <div id="summaryModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white rounded-lg p-8 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-800">ตัวอย่างอีเมล</h3>
+                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Email Preview Card -->
+            <div class="border rounded-lg shadow-sm">
+                <!-- Email Header -->
+                <div class="border-b p-4 bg-gray-50">
+                    <div class="space-y-2">
+                        <div class="flex">
+                            <span class="text-gray-600 w-20">จาก:</span>
+                            <span class="text-gray-800">support@example.com</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-600 w-20">ถึง:</span>
+                            <span class="text-gray-800" id="emailTo">-</span>
+                        </div>
+                        <div class="flex">
+                            <span class="text-gray-600 w-20">หัวข้อ:</span>
+                            <span class="text-gray-800">ยืนยันการลงทะเบียนและดาวน์โหลดไฟล์</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Email Content -->
+                <div class="p-6 space-y-4" id="emailContent">
+                    <!-- เนื้อหาอีเมลจะถูกเพิ่มด้วย JavaScript -->
+                </div>
+                
+                <!-- Download Section -->
+                <div class="border-t p-4 bg-gray-50">
+                    <div class="space-y-4">
+                        <p class="text-sm text-gray-600">คลิกปุ่มด้านล่างเพื่อดาวน์โหลดไฟล์ของคุณ</p>
+                        <a href="/path/to/your/file.pdf" 
+                           download 
+                           class="flex items-center justify-center space-x-2 bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300">
+                            <i class="fas fa-download"></i>
+                            <span>ดาวน์โหลดไฟล์</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Close Button -->
+            <div class="mt-6">
+                <button onclick="closeModal()" 
+                        class="w-full border border-gray-300 text-gray-600 font-bold py-3 px-6 rounded-lg hover:bg-gray-100 transition duration-300">
+                    ปิดหน้าต่าง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-800">ลงทะเบียนเพื่อรับไฟล์</h2>
+            <p class="text-gray-600 mt-2">กรุณากรอกข้อมูลให้ครบถ้วน</p>
+        </div>
+
+        <form id="registrationForm" class="space-y-6">
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+                    ชื่อ-นามสกุล
+                </label>
+                <input 
+                    type="text" 
+                    id="name" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                    required
+                >
+            </div>
+
+            <div>
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
+                    อีเมล
+                </label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
+                    required
+                >
+            </div>
+
+            <div>
+                <label class="flex items-center">
+                    <input type="checkbox" class="form-checkbox h-4 w-4 text-blue-500" required>
+                    <span class="ml-2 text-sm text-gray-600">
+                        ยอมรับเงื่อนไขการใช้งานและนโยบายความเป็นส่วนตัว
+                    </span>
+                </label>
+            </div>
+
+            <button 
+                type="submit" 
+                class="w-full bg-blue-500 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+            >
+                ลงทะเบียน
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // แสดง Toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastMessage.textContent = message;
+            
+            if (type === 'success') {
+                toastIcon.className = 'fas fa-check-circle text-green-500 mr-2';
+                toast.className = 'fixed top-4 right-4 bg-white shadow-lg rounded-lg p-4 flex items-center';
+            } else {
+                toastIcon.className = 'fas fa-exclamation-circle text-red-500 mr-2';
+                toast.className = 'fixed top-4 right-4 bg-white shadow-lg rounded-lg p-4 flex items-center';
+            }
+            
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function showModal() {
+            const modal = document.getElementById('summaryModal');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('summaryModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function displaySummary(formData) {
+            // แสดงอีเมลผู้รับ
+            document.getElementById('emailTo').textContent = formData.email;
+            
+            // แสดงเนื้อหาอีเมล
+            const emailContent = document.getElementById('emailContent');
+            emailContent.innerHTML = `
+                <h2 class="text-xl font-bold text-gray-800">ขอบคุณสำหรับการลงทะเบียน</h2>
+                <p class="text-gray-700">สวัสดีคุณ ${formData.name},</p>
+                <p class="text-gray-700">ขอบคุณที่ลงทะเบียนกับเรา คุณสามารถดาวน์โหลดไฟล์ได้จากปุ่มด้านล่าง</p>
+                <p class="text-gray-700 mt-4">หากมีข้อสงสัยเพิ่มเติม กรุณาติดต่อเรา</p>
+                <p class="text-gray-700">ขอแสดงความนับถือ<br>ทีมงานของเรา</p>
+            `;
+        }
+
+        async function sendEmail(formData) {
+            try {
+                const response = await fetch('http://localhost:3000/api/send-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to send email');
+                }
+
+                showToast("ส่งอีเมลยืนยันเรียบร้อยแล้ว", "success");
+            } catch (error) {
+                console.error("Email error:", error);
+                showToast("เกิดข้อผิดพลาดในการส่งอีเมล", "error");
+            }
+        }
+
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value
+            };
+
+            try {
+                // ส่งอีเมล
+                await sendEmail(formData);
+                
+                // แสดงข้อมูลใน Modal
+                displaySummary(formData);
+                showModal();
+            } catch (error) {
+                console.error('Error:', error);
+                showToast("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง", "error");
+            }
+        });
+
+        // ปิด Modal เมื่อคลิกพื้นหลัง
+        document.getElementById('summaryModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
